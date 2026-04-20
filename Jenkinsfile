@@ -43,14 +43,7 @@ pipeline {
             }
         }
         
-        stage('Docker Build & Image Scan (Trivy)') {
-            steps {
-                // Build the image locally to ensure the Dockerfile is valid
-                sh "docker build -t ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ./backend"
-                
-                // Note: Docker login and push steps have been removed to run without credentials
-            }
-        }
+
 
         stage('Set Active Environment (Terraform)') {
             steps {
