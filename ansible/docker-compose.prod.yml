@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  backend:
+    image: my-docker-repo/notes-backend:${IMAGE_TAG:-latest}
+    restart: always
+    environment:
+      PORT: 4000
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN}
+      DATABASE_URL: ${DATABASE_URL}
+      PG_SSL_REJECT_UNAUTHORIZED: "true"
+      NOTE_ENCRYPTION_KEY: ${NOTE_ENCRYPTION_KEY}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+    ports:
+      - "4000:4000"
+
+  frontend:
+    image: my-docker-repo/notes-frontend:${IMAGE_TAG:-latest}
+    restart: always
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    depends_on:
+      - backend
+    ports:
+      - "80:80"

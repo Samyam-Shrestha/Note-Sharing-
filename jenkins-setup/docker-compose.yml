@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: local-jenkins
+    ports:
+      - "8080:8080"    # Jenkins web interface
+      - "50000:50000"  # Jenkins agent connections
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock # Mount Docker socket so Jenkins can build images
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:

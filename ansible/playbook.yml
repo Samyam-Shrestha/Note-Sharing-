@@ -1,0 +1,76 @@
+---
+- name: Deploy Dockerized Application to target environment
+  hosts: all
+  become: yes
+  vars:
+    docker_image_tag: "latest"
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install Docker CE
+      apt:
+        name:
+          - docker-ce
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    - name: Download Amazon CloudWatch Agent
+      get_url:
+        url: https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+        dest: /tmp/amazon-cloudwatch-agent.deb
+
+    - name: Install Amazon CloudWatch Agent
+      apt:
+        deb: /tmp/amazon-cloudwatch-agent.deb
+      ignore_errors: true
+
+    - name: Start CloudWatch Agent
+      service:
+        name: amazon-cloudwatch-agent
+        state: started
+        enabled: yes
+      ignore_errors: true
+
+    - name: Ensure app directory exists
+      file:
+        path: /opt/notes-app
+        state: directory
+
+    - name: Copy docker-compose.prod.yml
+      copy:
+        src: docker-compose.prod.yml
+        dest: /opt/notes-app/docker-compose.yml
+
+    - name: Pull Docker images
+      command: docker compose pull
+      args:
+        chdir: /opt/notes-app
+      environment:
+        IMAGE_TAG: "{{ docker_image_tag }}"
+
+    - name: Start Docker Compose
+      command: docker compose up -d
+      args:
+        chdir: /opt/notes-app
+      environment:
+        IMAGE_TAG: "{{ docker_image_tag }}"
