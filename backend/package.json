@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "cross-env DOTENV_CONFIG_PATH=../.env node src/index.js",
+    "start:prod": "node src/index.js",
     "dev": "cross-env DOTENV_CONFIG_PATH=../.env node --watch src/index.js",
     "test": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --coverage --runInBand"
   },
