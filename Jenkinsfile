@@ -45,17 +45,10 @@ pipeline {
         
         stage('Docker Build & Image Scan (Trivy)') {
             steps {
+                // Build the image locally to ensure the Dockerfile is valid
                 sh "docker build -t ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ./backend"
                 
-                // Trivy scan is commented out
-                // sh "trivy image --exit-code 1 --severity CRITICAL ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
-                
-                withCredentials([usernamePassword(credentialsId: 'aryawastakn', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
-                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
-                    sh "docker push ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
-                    sh "docker tag ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ${env.DOCKER_IMAGE}:latest"
-                    sh "docker push ${env.DOCKER_IMAGE}:latest"
-                }
+                // Note: Docker login and push steps have been removed to run without credentials
             }
         }
 
