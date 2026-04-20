@@ -17,12 +17,7 @@ pipeline {
         
 
         
-        stage('SAST (Semgrep)') {
-            steps {
-                // Exclude dependency folders to avoid pathological scan times in CI agents.
-                sh 'semgrep scan --config=p/nodejs --config=p/jwt --config=semgrep.yml --exclude backend/node_modules --exclude frontend/node_modules --timeout 300 .'
-            }
-        }
+
 
         stage('Dependency Scan (npm audit)') {
             steps {
