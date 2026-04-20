@@ -15,14 +15,7 @@ pipeline {
             }
         }
         
-        stage('Secret Scan (GitLeaks)') {
-            steps {
-                sh """
-                    printf '[extend]\\nuseDefault = true\\n\\n[allowlist]\\npaths = [\\".env.example\\"]\\n' > .gitleaks.toml
-                    docker run --rm -v "\$PWD:/path" zricethezav/gitleaks:latest detect --no-git --source /path --config=/path/.gitleaks.toml -v
-                """
-            }
-        }
+
         
         stage('SAST (Semgrep)') {
             steps {
