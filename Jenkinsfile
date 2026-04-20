@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "my-docker-repo/notes-backend"
+        DOCKER_IMAGE = "samyamshrestha/notes-backend"
         DOCKER_TAG = "${env.BUILD_ID}"
         ACTIVE_ENV = "blue" // Or "green", depending on current state, ideally fetched dynamically
         APP_URL = "http://localhost"
@@ -45,14 +45,17 @@ pipeline {
         
         stage('Docker Build & Image Scan (Trivy)') {
             steps {
-                // Build the image locally to ensure the Dockerfile is valid
                 sh "docker build -t ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ./backend"
                 
                 // Trivy scan is commented out
                 // sh "trivy image --exit-code 1 --severity CRITICAL ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
                 
-                // Note: Image push is skipped since this is a test and we might not have valid credentials or a real repo.
-                // To push, you would need a 'dockerhub-creds' credentials entry in Jenkins and a real DOCKER_IMAGE.
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                    sh "docker push ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
+                    sh "docker tag ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ${env.DOCKER_IMAGE}:latest"
+                    sh "docker push ${env.DOCKER_IMAGE}:latest"
+                }
             }
         }
 
