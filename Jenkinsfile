@@ -17,8 +17,8 @@ pipeline {
         
         stage('Secret Scan (GitLeaks)') {
             steps {
-                // Scan workspace files (not full git history) using repo config/allowlist.
-                sh 'gitleaks detect --no-git --source . --config=.gitleaks.toml -v'
+                // Scan workspace files using the official gitleaks docker image
+                sh 'docker run --rm -v "$PWD:/path" zricethezav/gitleaks:latest detect --no-git --source /path --config=/path/.gitleaks.toml -v'
             }
         }
         
