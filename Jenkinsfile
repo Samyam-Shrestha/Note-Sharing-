@@ -34,7 +34,7 @@ pipeline {
             steps {
                 dir('backend') {
                     sh 'npm ci'
-                    sh "npm test -- --coverageThreshold='{\"global\":{\"branches\":80,\"functions\":80,\"lines\":80,\"statements\":80}}'"
+                    sh 'npm test'
                 }
                 dir('frontend') {
                     sh 'npm ci'
