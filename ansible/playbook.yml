@@ -12,7 +12,7 @@
           - apt-transport-https
           - ca-certificates
           - curl
-          - software-properties-common
+          - gnupg
         state: present
         update_cache: yes
 
@@ -23,7 +23,7 @@
 
     - name: Add Docker Repository
       apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
         state: present
 
     - name: Install Docker CE
@@ -34,32 +34,40 @@
         state: present
         update_cache: yes
 
-    - name: Download Amazon CloudWatch Agent
-      get_url:
-        url: https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
-        dest: /tmp/amazon-cloudwatch-agent.deb
-
-    - name: Install Amazon CloudWatch Agent
-      apt:
-        deb: /tmp/amazon-cloudwatch-agent.deb
-      ignore_errors: true
-
-    - name: Start CloudWatch Agent
-      service:
-        name: amazon-cloudwatch-agent
-        state: started
-        enabled: yes
-      ignore_errors: true
-
     - name: Ensure app directory exists
       file:
         path: /opt/notes-app
+        state: directory
+
+    - name: Ensure nginx config directory exists
+      file:
+        path: /opt/notes-app/nginx
+        state: directory
+
+    - name: Ensure Prometheus config directory exists
+      file:
+        path: /opt/notes-app/prometheus
         state: directory
 
     - name: Copy docker-compose.prod.yml
       copy:
         src: docker-compose.prod.yml
         dest: /opt/notes-app/docker-compose.yml
+
+    - name: Copy Nginx config
+      copy:
+        src: nginx/nginx.conf
+        dest: /opt/notes-app/nginx/nginx.conf
+
+    - name: Copy Nginx active upstream config
+      copy:
+        src: nginx/active-upstream.conf
+        dest: /opt/notes-app/nginx/active-upstream.conf
+
+    - name: Copy Prometheus config
+      copy:
+        src: prometheus/prometheus.yml
+        dest: /opt/notes-app/prometheus/prometheus.yml
 
     - name: Pull Docker images
       command: docker compose pull

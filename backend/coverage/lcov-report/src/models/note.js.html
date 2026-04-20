@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/45</span>
+                <span class='fraction'>0/50</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/33</span>
+                <span class='fraction'>0/42</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/38</span>
+                <span class='fraction'>0/43</span>
             </div>
         
             
@@ -158,7 +158,23 @@
 <a name='L93'></a><a href='#L93'>93</a>
 <a name='L94'></a><a href='#L94'>94</a>
 <a name='L95'></a><a href='#L95'>95</a>
-<a name='L96'></a><a href='#L96'>96</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -176,6 +192,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -217,6 +244,11 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -263,10 +295,21 @@ export async function <span class="fstat-no" title="function not covered" >ensur
       owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       title TEXT NOT NULL,
       content TEXT NOT NULL,
+      tags JSONB NOT NULL DEFAULT '[]'::jsonb,
+      is_pinned BOOLEAN NOT NULL DEFAULT FALSE,
+      is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+      is_trashed BOOLEAN NOT NULL DEFAULT FALSE,
       acl JSONB NOT NULL DEFAULT '{}'::jsonb,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+  `);
+  // Ensure columns exist if the table was created previously
+<span class="cstat-no" title="statement not covered" >  await pool.query(`</span>
+    ALTER TABLE notes ADD COLUMN IF NOT EXISTS tags JSONB NOT NULL DEFAULT '[]'::jsonb;
+    ALTER TABLE notes ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE notes ADD COLUMN IF NOT EXISTS is_archived BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE notes ADD COLUMN IF NOT EXISTS is_trashed BOOLEAN NOT NULL DEFAULT FALSE;
   `);
 }
 &nbsp;
@@ -293,28 +336,33 @@ export async function <span class="fstat-no" title="function not covered" >listA
     .map(<span class="fstat-no" title="function not covered" >(r</span>ow) =&gt; (<span class="cstat-no" title="statement not covered" >{ ...row, content: decryptNoteContent(row.content) })</span>);
 }
 &nbsp;
-export async function <span class="fstat-no" title="function not covered" >createNote(</span>{ ownerId, title, content }) {
+export async function <span class="fstat-no" title="function not covered" >createNote(</span>{ ownerId, title, content, tags = <span class="branch-0 cbranch-no" title="branch not covered" >[] </span>}) {
   const acl = <span class="cstat-no" title="statement not covered" >defaultAcl(ownerId);</span>
   // Security: note content is encrypted before persisting to DB.
   const encryptedContent = <span class="cstat-no" title="statement not covered" >encryptNoteContent(content);</span>
   const result = <span class="cstat-no" title="statement not covered" >await pool.query(</span>
-    `INSERT INTO notes (owner_id, title, content, acl) VALUES ($1, $2, $3, $4::jsonb) RETURNING *`,
-    [ownerId, title, encryptedContent, JSON.stringify(acl)]
+    `INSERT INTO notes (owner_id, title, content, tags, acl) VALUES ($1, $2, $3, $4::jsonb, $5::jsonb) RETURNING *`,
+    [ownerId, title, encryptedContent, JSON.stringify(tags), JSON.stringify(acl)]
   );
 <span class="cstat-no" title="statement not covered" >  return { ...result.rows[0], content };</span>
 }
 &nbsp;
-export async function <span class="fstat-no" title="function not covered" >updateNote(</span>{ id, userId, title, content }) {
+export async function <span class="fstat-no" title="function not covered" >updateNote(</span>{ id, userId, title, content, tags, is_pinned, is_archived, is_trashed }) {
   const existing = <span class="cstat-no" title="statement not covered" >await pool.query("SELECT * FROM notes WHERE id = $1", [id]);</span>
   const row = <span class="cstat-no" title="statement not covered" >existing.rows[0];</span>
 <span class="cstat-no" title="statement not covered" >  if (!row || !canEdit(userId, row.acl, row.owner_id)) <span class="cstat-no" title="statement not covered" >return null;</span></span>
 &nbsp;
-  const newTitle = <span class="cstat-no" title="statement not covered" >title ?? row.title;</span>
-  const newContent = <span class="cstat-no" title="statement not covered" >content ?? decryptNoteContent(row.content);</span>
+  const newTitle = <span class="cstat-no" title="statement not covered" >title !== undefined ? title : row.title;</span>
+  const newContent = <span class="cstat-no" title="statement not covered" >content !== undefined ? content : decryptNoteContent(row.content);</span>
   const encryptedContent = <span class="cstat-no" title="statement not covered" >encryptNoteContent(newContent);</span>
+  const newTags = <span class="cstat-no" title="statement not covered" >tags !== undefined ? JSON.stringify(tags) : JSON.stringify(row.tags);</span>
+  const newIsPinned = <span class="cstat-no" title="statement not covered" >is_pinned !== undefined ? is_pinned : row.is_pinned;</span>
+  const newIsArchived = <span class="cstat-no" title="statement not covered" >is_archived !== undefined ? is_archived : row.is_archived;</span>
+  const newIsTrashed = <span class="cstat-no" title="statement not covered" >is_trashed !== undefined ? is_trashed : row.is_trashed;</span>
+&nbsp;
   const result = <span class="cstat-no" title="statement not covered" >await pool.query(</span>
-    `UPDATE notes SET title = $1, content = $2, updated_at = NOW() WHERE id = $3 RETURNING *`,
-    [newTitle, encryptedContent, id]
+    `UPDATE notes SET title = $1, content = $2, tags = $3::jsonb, is_pinned = $4, is_archived = $5, is_trashed = $6, updated_at = NOW() WHERE id = $7 RETURNING *`,
+    [newTitle, encryptedContent, newTags, newIsPinned, newIsArchived, newIsTrashed, id]
   );
 <span class="cstat-no" title="statement not covered" >  return { ...result.rows[0], content: newContent };</span>
 }
@@ -355,7 +403,7 @@ export async function <span class="fstat-no" title="function not covered" >share
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-19T10:40:46.098Z
+                at 2026-04-20T16:44:45.108Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

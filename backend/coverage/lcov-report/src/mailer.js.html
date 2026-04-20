@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/crypto.js</title>
+    <title>Code coverage report for src/mailer.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">src</a> crypto.js</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">src</a> mailer.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">9.52% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>2/21</span>
+                <span class='fraction'>0/9</span>
             </div>
         
             
@@ -39,14 +39,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>0/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">11.11% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>2/18</span>
+                <span class='fraction'>0/9</span>
             </div>
         
             
@@ -93,26 +93,8 @@
 <a name='L28'></a><a href='#L28'>28</a>
 <a name='L29'></a><a href='#L29'>29</a>
 <a name='L30'></a><a href='#L30'>30</a>
-<a name='L31'></a><a href='#L31'>31</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -122,36 +104,57 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import crypto from "crypto";
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import nodemailer from "nodemailer";
 &nbsp;
-const ALGORITHM = "aes-256-gcm";
-const IV_LENGTH = 12;
+export async function <span class="fstat-no" title="function not covered" >sendVerificationCode(</span>email, code) {
+  // If SMTP is not configured, just log the code for local testing.
+<span class="cstat-no" title="statement not covered" >  if (!process.env.SMTP_HOST) {</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`\n=============================================`);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`[MOCK EMAIL] To: ${email}`);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`[MOCK EMAIL] Subject: Your Verification Code`);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`[MOCK EMAIL] Body: Your 6-digit code is: ${code}`);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`=============================================\n`);</span>
+<span class="cstat-no" title="statement not covered" >    return;</span>
+  }
 &nbsp;
-function <span class="fstat-no" title="function not covered" >getKey(</span>) {
-  const keyHex = <span class="cstat-no" title="statement not covered" >process.env.NOTE_ENCRYPTION_KEY;</span>
-<span class="cstat-no" title="statement not covered" >  if (!keyHex) <span class="cstat-no" title="statement not covered" >throw new Error("NOTE_ENCRYPTION_KEY is required");</span></span>
-  const key = <span class="cstat-no" title="statement not covered" >Buffer.from(keyHex, "hex");</span>
-<span class="cstat-no" title="statement not covered" >  if (key.length !== 32) <span class="cstat-no" title="statement not covered" >throw new Error("NOTE_ENCRYPTION_KEY must be 32 bytes hex");</span></span>
-<span class="cstat-no" title="statement not covered" >  return key;</span>
-}
+  const transporter = <span class="cstat-no" title="statement not covered" >nodemailer.createTransport({</span>
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >encryptNoteContent(</span>plainText) {
-  // Security: unique IV per record to prevent nonce reuse.
-  const iv = <span class="cstat-no" title="statement not covered" >crypto.randomBytes(IV_LENGTH);</span>
-  const cipher = <span class="cstat-no" title="statement not covered" >crypto.createCipheriv(ALGORITHM, getKey(), iv);</span>
-  const encrypted = <span class="cstat-no" title="statement not covered" >Buffer.concat([cipher.update(plainText, "utf8"), cipher.final()]);</span>
-  const tag = <span class="cstat-no" title="statement not covered" >cipher.getAuthTag();</span>
-<span class="cstat-no" title="statement not covered" >  return `${iv.toString("hex")}:${tag.toString("hex")}:${encrypted.toString("hex")}`;</span>
-}
-&nbsp;
-export function <span class="fstat-no" title="function not covered" >decryptNoteContent(</span>payload) {
-<span class="cstat-no" title="statement not covered" >  if (!payload) <span class="cstat-no" title="statement not covered" >return "";</span></span>
-  const [ivHex, tagHex, encryptedHex] = <span class="cstat-no" title="statement not covered" >payload.split(":");</span>
-  const decipher = <span class="cstat-no" title="statement not covered" >crypto.createDecipheriv(ALGORITHM, getKey(), Buffer.from(ivHex, "hex"));</span>
-<span class="cstat-no" title="statement not covered" >  decipher.setAuthTag(Buffer.from(tagHex, "hex"));</span>
-  const decrypted = <span class="cstat-no" title="statement not covered" >Buffer.concat([decipher.update(Buffer.from(encryptedHex, "hex")), decipher.final()]);</span>
-<span class="cstat-no" title="statement not covered" >  return decrypted.toString("utf8");</span>
+<span class="cstat-no" title="statement not covered" >  await transporter.sendMail({</span>
+    from: `"Secure Notes" &lt;${process.env.SMTP_USER || "noreply@example.com"}&gt;`,
+    to: email,
+    subject: "Verify Your Secure Notes Account",
+    text: `Your 6-digit verification code is: ${code}`,
+    html: `&lt;b&gt;Your 6-digit verification code is:&lt;/b&gt; &lt;h1&gt;${code}&lt;/h1&gt;`,
+  });
 }
 &nbsp;</pre></td></tr></table></pre>
 

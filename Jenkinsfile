@@ -4,8 +4,8 @@ pipeline {
     environment {
         DOCKER_IMAGE = "my-docker-repo/notes-backend"
         DOCKER_TAG = "${env.BUILD_ID}"
-        AWS_REGION = "us-east-1"
         ACTIVE_ENV = "blue" // Or "green", depending on current state, ideally fetched dynamically
+        APP_URL = "http://localhost"
     }
 
     stages {
@@ -65,11 +65,11 @@ pipeline {
             }
         }
 
-        stage('Provision Infrastructure (Terraform)') {
+        stage('Set Active Environment (Terraform)') {
             steps {
                 dir('terraform') {
-                    // We assume AWS credentials are provided via Jenkins plugins/environment
-                    sh 'terraform init'
+                    // Terraform renders the active Nginx upstream (blue or green), no AWS required.
+                    sh 'terraform init -backend=false'
                     sh "terraform apply -auto-approve -var='active_environment=${ACTIVE_ENV}'"
                 }
             }
@@ -78,8 +78,7 @@ pipeline {
         stage('Deploy Application (Ansible)') {
             steps {
                 dir('ansible') {
-                    // Deploy to the target environment (e.g., if ACTIVE_ENV is blue, we deploy to green to prep switch)
-                    // The playbook handles setting up docker, pulling the image, and starting it.
+                    // Playbook deploys blue/green stacks, Nginx routing, and Prometheus monitoring.
                     sh "ansible-playbook -i inventory.ini playbook.yml -e 'docker_image_tag=${env.DOCKER_TAG}'"
                 }
             }
@@ -87,10 +86,7 @@ pipeline {
         
         stage('DAST (OWASP ZAP)') {
             steps {
-                script {
-                    def appUrl = sh(script: "cd terraform && terraform output -raw alb_dns_name", returnStdout: true).trim()
-                    sh "docker run -t owasp/zap2docker-stable zap-baseline.py -t http://${appUrl} -c zap-baseline.conf || true"
-                }
+                sh "docker run -t owasp/zap2docker-stable zap-baseline.py -t ${APP_URL} -c zap-baseline.conf || true"
             }
         }
     }

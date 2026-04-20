@@ -1,14 +1,9 @@
-output "alb_dns_name" {
-  description = "DNS name of the ALB"
-  value       = aws_lb.main.dns_name
+output "active_environment" {
+  description = "Active environment currently selected for Nginx routing"
+  value       = var.active_environment
 }
 
-output "blue_instance_ip" {
-  description = "Public IP of the Blue instance"
-  value       = aws_instance.blue.public_ip
-}
-
-output "green_instance_ip" {
-  description = "Public IP of the Green instance"
-  value       = aws_instance.green.public_ip
+output "nginx_active_upstream_file" {
+  description = "Rendered Nginx upstream file path"
+  value       = local_file.nginx_active_upstream.filename
 }
