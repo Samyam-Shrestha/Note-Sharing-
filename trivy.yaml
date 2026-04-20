@@ -1,0 +1,8 @@
+format: table
+ignore-unfixed: true
+vuln-type:
+  - os
+  - library
+severity:
+  - CRITICAL
+exit-code: 1

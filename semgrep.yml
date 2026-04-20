@@ -1,0 +1,12 @@
+rules:
+  - id: notes-content-logged-before-encryption
+    patterns:
+      - pattern-either:
+          - pattern: console.log($MSG, $CONTENT)
+          - pattern: console.log($CONTENT)
+      - metavariable-regex:
+          metavariable: $CONTENT
+          regex: (?i)(content|note|plaintext)
+    message: "Potential unencrypted note content logging detected."
+    languages: [javascript, typescript]
+    severity: ERROR
