@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "samyamshrestha/notes-backend"
+        DOCKER_IMAGE = "aryawastakn/notes-backend"
         DOCKER_TAG = "${env.BUILD_ID}"
         ACTIVE_ENV = "blue" // Or "green", depending on current state, ideally fetched dynamically
         APP_URL = "http://localhost"
@@ -50,7 +50,7 @@ pipeline {
                 // Trivy scan is commented out
                 // sh "trivy image --exit-code 1 --severity CRITICAL ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
                 
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                withCredentials([usernamePassword(credentialsId: 'aryawastakn', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
                     sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
                     sh "docker push ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
                     sh "docker tag ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ${env.DOCKER_IMAGE}:latest"
