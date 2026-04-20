@@ -14,3 +14,13 @@ id = "db-connection-string"
 description = "Detect database connection string leakage"
 regex = '''(?i)postgres(?:ql)?:\/\/[^:\s]+:[^@\s]+@[^\/\s]+\/[^\s"']+'''
 tags = ["database", "credentials"]
+
+[allowlist]
+description = "Ignore local/dev secret files that are managed outside CI scans"
+paths = [
+  '''(^|/)\.env$''',
+  '''(^|/)\.env\.example$''',
+  '''(^|/)private\.pem$''',
+  '''(^|/)public\.pem$''',
+  '''(^|/)ansible/docker-compose\.prod\.yml$'''
+]

@@ -4,6 +4,10 @@
   become: yes
   vars:
     docker_image_tag: "latest"
+    database_url: "{{ lookup('env', 'DATABASE_URL') }}"
+    note_encryption_key: "{{ lookup('env', 'NOTE_ENCRYPTION_KEY') }}"
+    jwt_private_key: "{{ lookup('env', 'JWT_PRIVATE_KEY') }}"
+    jwt_public_key: "{{ lookup('env', 'JWT_PUBLIC_KEY') }}"
 
   tasks:
     - name: Install required packages
@@ -69,15 +73,31 @@
         src: prometheus/prometheus.yml
         dest: /opt/notes-app/prometheus/prometheus.yml
 
+    - name: Validate required secret inputs are present
+      assert:
+        that:
+          - database_url | length > 0
+          - note_encryption_key | length > 0
+          - jwt_private_key | length > 0
+          - jwt_public_key | length > 0
+        fail_msg: "Missing one or more required deployment secrets from Jenkins credentials."
+
+    - name: Render deployment environment file
+      template:
+        src: env.prod.j2
+        dest: /opt/notes-app/.env
+        mode: "0600"
+      no_log: true
+
     - name: Pull Docker images
-      command: docker compose pull
+      command: docker compose --env-file .env pull
       args:
         chdir: /opt/notes-app
       environment:
         IMAGE_TAG: "{{ docker_image_tag }}"
 
     - name: Start Docker Compose
-      command: docker compose up -d
+      command: docker compose --env-file .env up -d
       args:
         chdir: /opt/notes-app
       environment:

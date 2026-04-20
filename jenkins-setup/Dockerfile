@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
     lsb-release \
-    software-properties-common \
     wget \
     unzip \
     python3-pip \
@@ -40,8 +39,12 @@ RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --
 # Install Semgrep
 RUN python3 -m pip install semgrep --break-system-packages
 
-# Install GitLeaks
-RUN curl -sSfL https://raw.githubusercontent.com/gitleaks/gitleaks/master/install.sh | sh -s -- -b /usr/local/bin
+# Install GitLeaks from GitHub releases
+RUN GITLEAKS_VERSION=8.24.2 && \
+    wget -qO /tmp/gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" && \
+    tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks && \
+    install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks && \
+    rm -f /tmp/gitleaks /tmp/gitleaks.tar.gz
 
 # Set permissions for docker group so jenkins user can run docker commands
 RUN groupadd -g 999 docker && usermod -aG docker jenkins || true

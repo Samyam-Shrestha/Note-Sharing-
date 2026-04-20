@@ -69,6 +69,7 @@ services:
   node-exporter:
     image: prom/node-exporter:v1.8.2
     restart: always
+    profiles: ["linux-observability"]
     command:
       - "--path.rootfs=/host"
     volumes:
@@ -79,6 +80,7 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
     restart: always
+    profiles: ["linux-observability"]
     privileged: true
     devices:
       - /dev/kmsg:/dev/kmsg

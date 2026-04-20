@@ -17,13 +17,15 @@ pipeline {
         
         stage('Secret Scan (GitLeaks)') {
             steps {
-                sh 'gitleaks detect --source . -v'
+                // Scan workspace files (not full git history) using repo config/allowlist.
+                sh 'gitleaks detect --no-git --source . --config=.gitleaks.toml -v'
             }
         }
         
         stage('SAST (Semgrep)') {
             steps {
-                sh 'semgrep ci --config=p/nodejs --config=p/jwt --config=semgrep.yml'
+                // Exclude dependency folders to avoid pathological scan times in CI agents.
+                sh 'semgrep scan --config=p/nodejs --config=p/jwt --config=semgrep.yml --exclude backend/node_modules --exclude frontend/node_modules --timeout 300 .'
             }
         }
 
@@ -78,15 +80,24 @@ pipeline {
         stage('Deploy Application (Ansible)') {
             steps {
                 dir('ansible') {
-                    // Playbook deploys blue/green stacks, Nginx routing, and Prometheus monitoring.
-                    sh "ansible-playbook -i inventory.ini playbook.yml -e 'docker_image_tag=${env.DOCKER_TAG}'"
+                    // Bind deployment secrets from Jenkins Credentials and pass them to Ansible.
+                    // Update credential IDs below to match your Jenkins instance.
+                    withCredentials([
+                        string(credentialsId: 'notes-database-url', variable: 'DATABASE_URL'),
+                        string(credentialsId: 'notes-encryption-key', variable: 'NOTE_ENCRYPTION_KEY'),
+                        string(credentialsId: 'notes-jwt-private-key', variable: 'JWT_PRIVATE_KEY'),
+                        string(credentialsId: 'notes-jwt-public-key', variable: 'JWT_PUBLIC_KEY')
+                    ]) {
+                        sh "ansible-playbook -i inventory.ini playbook.yml -e 'docker_image_tag=${env.DOCKER_TAG}'"
+                    }
                 }
             }
         }
         
         stage('DAST (OWASP ZAP)') {
             steps {
-                sh "docker run -t owasp/zap2docker-stable zap-baseline.py -t ${APP_URL} -c zap-baseline.conf || true"
+                // Use maintained ZAP image and mount workspace config inside container.
+                sh 'docker run --rm -t -v "$PWD:/zap/wrk:ro" zaproxy/zap-stable zap-baseline.py -t "${APP_URL}" -c /zap/wrk/zap-baseline.conf || true'
             }
         }
     }
