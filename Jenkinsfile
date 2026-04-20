@@ -45,32 +45,7 @@ pipeline {
         
 
 
-        stage('Set Active Environment (Terraform)') {
-            steps {
-                dir('terraform') {
-                    // Terraform renders the active Nginx upstream (blue or green), no AWS required.
-                    sh 'terraform init -backend=false'
-                    sh "terraform apply -auto-approve -var='active_environment=${ACTIVE_ENV}'"
-                }
-            }
-        }
 
-        stage('Deploy Application (Ansible)') {
-            steps {
-                dir('ansible') {
-                    // Bind deployment secrets from Jenkins Credentials and pass them to Ansible.
-                    // Update credential IDs below to match your Jenkins instance.
-                    withCredentials([
-                        string(credentialsId: 'notes-database-url', variable: 'DATABASE_URL'),
-                        string(credentialsId: 'notes-encryption-key', variable: 'NOTE_ENCRYPTION_KEY'),
-                        string(credentialsId: 'notes-jwt-private-key', variable: 'JWT_PRIVATE_KEY'),
-                        string(credentialsId: 'notes-jwt-public-key', variable: 'JWT_PUBLIC_KEY')
-                    ]) {
-                        sh "ansible-playbook -i inventory.ini playbook.yml -e 'docker_image_tag=${env.DOCKER_TAG}'"
-                    }
-                }
-            }
-        }
         
         stage('DAST (OWASP ZAP)') {
             steps {
