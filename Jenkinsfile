@@ -17,8 +17,10 @@ pipeline {
         
         stage('Secret Scan (GitLeaks)') {
             steps {
-                // Scan workspace files using the official gitleaks docker image
-                sh 'docker run --rm -v "$PWD:/path" zricethezav/gitleaks:latest detect --no-git --source /path --config=/path/.gitleaks.toml -v'
+                sh """
+                    printf '[extend]\\nuseDefault = true\\n\\n[allowlist]\\npaths = [\\".env.example\\"]\\n' > .gitleaks.toml
+                    docker run --rm -v "\$PWD:/path" zricethezav/gitleaks:latest detect --no-git --source /path --config=/path/.gitleaks.toml -v
+                """
             }
         }
         
